@@ -1,0 +1,31 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/sortLatest"
+        android:orderInCategory="200"
+        android:title="Sort by Date"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/sortReplies"
+        android:orderInCategory="300"
+        android:title="Sort by Replies"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/sortViews"
+        android:orderInCategory="400"
+        android:title="Sort by Views"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/btn_sortAsc"
+        android:orderInCategory="500"
+        android:title="Asc"
+        android:icon="@mipmap/ic_sort_za"
+        app:showAsAction="ifRoom" />
+</menu>
