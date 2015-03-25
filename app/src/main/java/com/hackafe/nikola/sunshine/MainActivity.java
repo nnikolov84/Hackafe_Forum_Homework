@@ -29,6 +29,7 @@ public class MainActivity extends ActionBarActivity {
     String load_posts_result = null;
     boolean waith = true;
     Context context;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,20 +60,12 @@ public class MainActivity extends ActionBarActivity {
 
     public boolean load() {
         //  View rootView = getMenuInflater().inflate(R.layout.fragment_main, menu);
-        LayoutInflater inflater = getLayoutInflater();
-        waith = true;
         new LoadPosts().execute();
-        int slp = 0;
-        while (waith) {
-            slp++;
-            try {
-                Thread.sleep(100);
-                //     Log.e(TAG, "Sleep " + slp);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
+        return false;
+    }
+
+    public boolean afterLoad() {
+        LayoutInflater inflater = getLayoutInflater();
         switch (load_posts_result) {
             case "fetch_error":
                 Toast.makeText(this, "Грешка при извличане на данни!",
@@ -161,7 +154,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     ///////////////////////////////////////////
-    private class LoadPosts extends AsyncTask<String, Void, String> {
+    public class LoadPosts extends AsyncTask<String, Integer, String> {
         PowerManager.WakeLock mWakeLock;
         ProgressDialog pDialog = new ProgressDialog(context);
         getForumData getForumData = new getForumData();
@@ -170,29 +163,27 @@ public class MainActivity extends ActionBarActivity {
         protected String doInBackground(String... params) {
 
 
-            Thread mThread = new Thread() {
-                @Override
-                public void run() {
-                    data = getForumData.getTopics(sort);
-                    if (data == "ERROR") {
-                        load_posts_result = "fetch_error";
+            data = getForumData.getTopics(sort);
+            if (data == "ERROR") {
+                load_posts_result = "fetch_error";
 
-                    } else {
-                        // Log.e(TAG, "START Parse Async");
-                        topics = getForumData.parseTopics(data, pDialog);
-                        //   Log.e(TAG, "FINISH Parse Async "+topics.size());
-                        if (topics.size() == 0) {
-                            load_posts_result = "pars_error";
-                            // return "pars_error";
-                        }
-                    }
-                    load_posts_result = "OK";
-                    //  Log.e(TAG, "RETURN Async ");
-                    waith = false;
+            } else {
+                // Log.e(TAG, "START Parse Async");
+                topics = getForumData.parseTopics(data, this);
+                publishProgress();
+                //   Log.e(TAG, "FINISH Parse Async "+topics.size());
+                if (topics.size() == 0) {
+                    load_posts_result = "pars_error";
+                    // return "pars_error";
                 }
-            };
-            mThread.start();
+            }
+            load_posts_result = "OK";
+            //  Log.e(TAG, "RETURN Async ");
             return "OK";
+        }
+
+        public void setProgress(int p) {
+            publishProgress(p, 100);
         }
 
         @Override
@@ -201,7 +192,9 @@ public class MainActivity extends ActionBarActivity {
             if (pDialog != null && pDialog.isShowing()) {
                 pDialog.dismiss();
             }
+            waith = false;
             super.onPostExecute("OK");
+            afterLoad();
         }
 
         @Override
@@ -213,7 +206,8 @@ public class MainActivity extends ActionBarActivity {
             Log.e(TAG, "BEFORE DIALOG SHOW");
             pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             pDialog.setMessage("Loading data...");
-            pDialog.setIndeterminate(true);
+            pDialog.setIndeterminate(false);
+            pDialog.setMax(100);
             pDialog.setCancelable(false);
             pDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             pDialog.show();
@@ -223,7 +217,9 @@ public class MainActivity extends ActionBarActivity {
         }
 
         @Override
-        protected void onProgressUpdate(Void... values) {
+        protected void onProgressUpdate(Integer... values) {
+            if (values.length > 0)
+                pDialog.setProgress(values[0]);
         }
     }
     //////////////////////////////////////
