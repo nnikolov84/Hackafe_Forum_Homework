@@ -29,6 +29,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -37,7 +38,8 @@ import java.util.List;
 
 public class getForumData {
     final String TAG = "SSgetForumData";
-    ProgressDialog lvpdialog;
+    private MainActivity.LoadPosts task;
+//    ProgressDialog lvpdialog;
 
     public String getTopics(String sort) {
         try {
@@ -67,11 +69,12 @@ public class getForumData {
         return s.hasNext() ? s.next() : "";
     }
 
-    public List<Topic> parseTopics(String data, ProgressDialog pdialog) {
+    public List<Topic> parseTopics(String data, MainActivity.LoadPosts task) {
         int percent;
 
-        this.lvpdialog = pdialog;
-        lvpdialog.setMessage("Parsing Data ...");
+        this.task = task;
+
+//        lvpdialog.setMessage("Parsing Data ...");
         //  Log.e(TAG, "START PARSING");
         try {
             List<Topic> titleList = new ArrayList<Topic>();
@@ -82,9 +85,8 @@ public class getForumData {
             JSONObject topic_list = obj.getJSONObject("topic_list");
             JSONArray topics = topic_list.getJSONArray("topics");
             for (int i = 0; i < topics.length(); i++) {
-                // percent = (int) (topics.length() * 100 / i+1);
-                percent = 1;
-                lvpdialog.setProgress(percent);
+                percent = (int) (topics.length() * 100 / (i+1));
+                task.setProgress(percent);
                 JSONObject jtopic = topics.getJSONObject(i);
                 title = jtopic.getString("title");
                 //       Log.e(TAG, "title 2 : "+ title);
@@ -124,7 +126,7 @@ public class getForumData {
         } catch (Exception r) {
             Log.e(TAG, "Error on pars: " + r.getMessage(), r);
         }
-        return null;
+        return new LinkedList<>();
     }
 
 }
